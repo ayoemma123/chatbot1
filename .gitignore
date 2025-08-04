@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+*__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+*.env
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+
+# VS Code settings
+.vscode/
+
+# macOS system files
+.DS_Store
+
+# Jupyter Notebook checkpoints (if any)
+.ipynb_checkpoints/
+
+# Python egg metadata
+*.egg-info/
+.eggs/
+
+# Model files (like saved ML models)
+*.pkl
+*.h5
+*.joblib
+
+# Test output
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+.cache
+.pytest_cache/
