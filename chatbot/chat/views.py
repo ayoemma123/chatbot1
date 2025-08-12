@@ -40,13 +40,32 @@ def chatbot_api(request):
 
         # Predict intent
         intent = model.predict([user_message])[0]
-        response = RESPONSES.get(intent, "I'm not sure I understand. Can you rephrase?")
+        model_labels = getattr(model, "classes_", [])
 
-        # Save to database
+        # If the predicted intent is not in known labels, only send the response
+        if intent not in model_labels:
+            response = "We will transfer your message to a support staff for further assistance."
+
+            # Save to DB
+            ChatLog.objects.create(
+                user_message=user_message,
+                predicted_intent="",  # No intent
+                response_sent=response
+            )
+
+            return JsonResponse({"response": response})
+
+        # Otherwise, return both
+        response = f"I detected your intent as '{intent}', but I'm still learning to answer that."
+
         ChatLog.objects.create(
             user_message=user_message,
             predicted_intent=intent,
             response_sent=response
         )
 
-        return JsonResponse({"intent": intent}) 
+        return JsonResponse({
+            "intent": intent
+        })
+
+
