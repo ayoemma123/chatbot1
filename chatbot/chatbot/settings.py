@@ -97,10 +97,10 @@ WSGI_APPLICATION = 'chatbot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test_db',
-        'USER': 'root',
-        'PASSWORD': 'Ayo2003@a',
-        'HOST': '127.0.0.1',
+        'NAME': 'chatbot_test',
+        'USER': 'admin',
+        'PASSWORD': 'Kolapoishola123$',
+        'HOST': 'new-tpnl2-db.chsyosaq0vc0.us-east-2.rds.amazonaws.com',
         'PORT': '3306', 
     }
 }

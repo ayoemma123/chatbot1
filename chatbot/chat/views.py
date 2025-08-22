@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.conf import settings
 
 import os
 import joblib
@@ -6,66 +7,65 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .models import ChatLog  # import the model
+# import the model
+from .models import ChatLog  
 
-# Load model once
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(BASE_DIR, "svm_chatbot.pkl")
-model = joblib.load(model_path)
 
-# Simple response map
-RESPONSES = {
-    "greet": "Hello! How can I assist you today?",
-    "ask_product": "Sure! We have phones, laptops, and shoes. What are you interested in?",
-    "product_price": "Which product would you like the price for?",
-    "order_status": "Please provide your order number so I can check the status.",
-    "shipping_info": "Standard shipping takes 3-5 business days. Would you like express delivery?",
-    "return_policy": "Our return policy allows returns within 30 days of delivery.",
-    "track_order": "Please provide your tracking number to proceed.",
-    "payment_methods": "We accept cards, bank transfers, and PayPal.",
-    "cancel_order": "I can help with that. Please provide your order number.",
-    "store_hours": "We're open Monday to Saturday from 9 AM to 9 PM.",
-    "goodbye": "Thank you for visiting. Come back soon!",
-    "fallback": "I'm sorry, I didn't understand that. Could you rephrase?"
-}
+# Load model & responses once (not on every request)
+
+MODEL_PATH = os.path.join(settings.BASE_DIR, "chat", "svm_chatbot.pkl")
+RESPONSES_PATH = os.path.join(settings.BASE_DIR, "chat", "responses.pkl")
+
+
+model = joblib.load(MODEL_PATH)
+RESPONSES = joblib.load(RESPONSES_PATH)
 
 
 
+# API FOR THE HOMEINTERIORS 
 
 @csrf_exempt
 def chatbot_api(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        user_message = data.get("message", "")
+        try:
+            data = json.loads(request.body)
+            user_message = data.get("message", "").strip()
 
-        # Predict intent
-        intent = model.predict([user_message])[0]
-        model_labels = getattr(model, "classes_", [])
+            if not user_message:
+                return JsonResponse({"response": "Please enter a message."}, status=400)
 
-        # If the predicted intent is not in known labels, only send the response
-        if intent not in model_labels:
-            response = "We will transfer your message to a support staff for further assistance."
+            # Predict intent
+            try:
+                intent = model.predict([user_message])[0]
+            except Exception:
+                intent = None
 
-            # Save to DB
+            # Fallback if no intent detected
+            if not intent or intent not in RESPONSES:
+                response = f"Sorry, I don't fully understand '{user_message}'. Our support staff will assist you shortly."
+                ChatLog.objects.create(
+                    user_message=user_message,
+                    predicted_intent="unknown",
+                    response_sent=response
+                )
+                return JsonResponse({"intent": "unknown", "response": response})
+
+            # ✅ Get mapped response from RESPONSES dict
+            response = RESPONSES.get(
+                intent,
+                f"I detected your intent as '{intent}', but I’m still learning the best answer."
+            )
+
+            # Save chat log
             ChatLog.objects.create(
                 user_message=user_message,
-                predicted_intent="",  # No intent
+                predicted_intent=intent,
                 response_sent=response
             )
 
-            return JsonResponse({"response": response})
+            return JsonResponse({"intent": intent})
 
-        # Otherwise, return both
-        response = f"I detected your intent as '{intent}', but I'm still learning to answer that."
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
-        ChatLog.objects.create(
-            user_message=user_message,
-            predicted_intent=intent,
-            response_sent=response
-        )
-
-        return JsonResponse({
-            "intent": intent
-        })
-
-
+    return JsonResponse({"error": "Only POST method allowed"}, status=405)
