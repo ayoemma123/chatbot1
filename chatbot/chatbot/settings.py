@@ -1,5 +1,6 @@
 
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,6 +23,10 @@ SECRET_KEY = "3lp5wji$1ah39s1f(r1vymv(680d6(2o@#lqt()@%8op5sv%#f"
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = False
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 ALLOWED_HOSTS = ["*"]
