@@ -16,7 +16,8 @@ from django.views.decorators.csrf import csrf_exempt
 # import the model
 from .models import ChatLog  
 
-# Load model & responses once (not on every request)
+
+# --- Self thousht model it is not used --- #
 MODEL_PATH = os.path.join(settings.BASE_DIR, "chat", "svm_chatbot.pkl")
 RESPONSES_PATH = os.path.join(settings.BASE_DIR, "chat", "responses.pkl")
 
@@ -27,7 +28,7 @@ RESPONSES = joblib.load(RESPONSES_PATH)
 @csrf_exempt
 def chatbot_api(request):
     try:
-        # --- POST (main API use) ---
+        # --- POST (main API use) --- #
         if request.method == "POST":
             data = json.loads(request.body)
             user_message = data.get("message", "").strip()
@@ -62,7 +63,7 @@ def chatbot_api(request):
 
             return JsonResponse({"intent": intent, "response": response})
 
-        # --- GET (for quick browser testing) ---
+        # --- GET (for quick browser testing) --- #
         elif request.method == "GET":
             user_message = request.GET.get("message", "").strip()
             if not user_message:
@@ -80,7 +81,7 @@ def chatbot_api(request):
             response = RESPONSES.get(intent, f"Detected intent: {intent}")
             return JsonResponse({"intent": intent})
 
-        # --- Other methods ---
+        # --- Other methods --- #
         else:
             return JsonResponse({"error": "Only GET and POST methods allowed"}, status=405)
 
@@ -89,13 +90,11 @@ def chatbot_api(request):
 
 
 
-# Load FAQ context from file
+# --- GEMINI API WHICH IS BEING USED --- #
 FAQ_FILE_PATH = os.path.join(settings.BASE_DIR, "chat", "faq.txt")
 
 with open(FAQ_FILE_PATH, "r", encoding="utf-8") as f:
     faq_context = f.read()
-
-
 
 
 # Setup Gemini client (no configure in google-genai)

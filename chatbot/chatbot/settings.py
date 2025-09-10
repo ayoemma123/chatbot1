@@ -2,6 +2,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,16 +14,16 @@ load_dotenv(env_path)
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+#See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = 'django-insecure-um3k8i%--pcluneokrlcnz+wbu59p--ads3^5qoa7+q03u1h2j'
 
-SECRET_KEY = "3lp5wji$1ah39s1f(r1vymv(680d6(2o@#lqt()@%8op5sv%#f"
+SECRET_KEY = config("SECRET_KEY", default="unsafe-secret")
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 #DEBUG = False
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 
 load_dotenv()
@@ -64,6 +65,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
 
+# --       Django dependeces      -- #
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -102,11 +105,11 @@ WSGI_APPLICATION = 'chatbot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'chatbot_test',
-        'USER': 'admin',
-        'PASSWORD': 'Kolapoishola123$',
-        'HOST': 'new-tpnl2-db.chsyosaq0vc0.us-east-2.rds.amazonaws.com',
-        'PORT': '3306', 
+        'NAME': config("DB_NAME"),
+        'USER': config("DB_USER"),
+        'PASSWORD': config("DB_PASSWORD"),
+        'HOST': config("DB_HOST"),
+        'PORT': config("DB_PORT", default="3306"), 
     }
 }
 
