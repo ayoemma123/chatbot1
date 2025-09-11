@@ -160,4 +160,4 @@ homeinterior-chatbox/
 ---
 
 ## 📜 License
-This project is licensed under the **MIT License** – free to use and modify.  
+This project is licensed under the **OLULANA EMMANUEL** – free to use and modify.  
